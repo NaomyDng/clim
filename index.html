@@ -14,15 +14,32 @@
   <meta property="og:description" content="Installation, entretien, dépannage. Devis rapide. Bruxelles et environs." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.climpro.be/" />
-  <meta property="og:image" content="assets/img/home.webp?v=2" />
+  <meta property="og:image" content="assets/img/home.webp?v=3" />
 
-  <!-- Perfs -->
-  <link rel="preload" as="image" href="assets/img/home.webp?v=2" fetchpriority="high" />
+  <!-- LCP image (préchargée, haute priorité) -->
+  <link rel="preload" as="image" href="assets/img/home.webp?v=3" fetchpriority="high" />
+
+  <!-- Connexions externes -->
   <link rel="preconnect" href="https://formspree.io" crossorigin>
   <link rel="dns-prefetch" href="https://formspree.io">
 
-  <link rel="stylesheet" href="assets/css/style.css?v=2" />
-  <script defer src="assets/js/main.js?v=2"></script>
+  <!-- Critical CSS minimal (au-dessus de la ligne de flottaison) -->
+  <style>
+    html,body{margin:0;padding:0;height:100%}
+    body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;background:#fff;color:#0f172a}
+    .hero{position:relative;min-height:70vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hero-overlay{position:absolute;inset:0}
+    .hero-text{position:relative;z-index:1;padding:24px;text-align:center}
+    .square-cta{display:inline-block;padding:14px 18px;border:1px solid currentColor;text-decoration:none}
+  </style>
+
+  <!-- CSS principal en asynchrone (plus de render-blocking) -->
+  <link rel="preload" href="assets/css/style.css?v=3" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/css/style.css?v=3"></noscript>
+
+  <!-- JS non bloquant -->
+  <script defer src="assets/js/main.js?v=3"></script>
 
   <!-- Schéma LocalBusiness -->
   <script type="application/ld+json">
