@@ -532,3 +532,6 @@ a:focus-visible, button:focus-visible{
 /* Option si Lighthouse pointe le bouton bleu (texte trop clair) :
    Dé-commente la ligne suivante pour un contraste AA strict sans changer ton bleu */
 /* .btn--primary{ color:#0b1220 !important; } */
+/* Menu: accepte .open ou .is-open, même comportement */
+.menu{ display:block !important; transform:translateY(-100%); transition:transform .28s ease; will-change:transform; }
+.menu.open, .menu.is-open{ transform:translateY(0); }
