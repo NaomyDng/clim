@@ -195,8 +195,15 @@ img{ max-width:100%; display:block }
   display:inline-flex; align-items:center; justify-content:center; gap:.5rem; text-decoration:none;
   padding:.8rem 1.05rem; border-radius:12px; font-weight:800; border:1px solid transparent; cursor:pointer;
 }
-.btn--primary{ background:var(--brand); color:#fff; box-shadow: 0 6px 20px rgba(14,165,233,.35); }
-.btn--primary:hover{ background:var(--brand-2) }
+.btn--primary{
+  background:#0284c7;   /* bleu conforme AA */
+  color:#fff;
+  box-shadow: 0 6px 20px rgba(2,6,23,.25);
+}
+.btn--primary:hover{
+  background:#0369a1;   /* hover un peu plus foncé */
+  color:#fff;
+}
 .btn--ghost{ background:transparent; color:#e2e8f0; border-color:rgba(148,163,184,.35) }
 .btn--ghost:hover{ border-color:#e2e8f0 }
 
