@@ -196,7 +196,7 @@ img{ max-width:100%; display:block }
   padding:.8rem 1.05rem; border-radius:12px; font-weight:800; border:1px solid transparent; cursor:pointer;
 }
 .btn--primary{
-  background:#0284c7;   /* bleu conforme AA */
+  background:#0369a1;   /* bleu conforme AA */
   color:#fff;
   box-shadow: 0 6px 20px rgba(2,6,23,.25);
 }
