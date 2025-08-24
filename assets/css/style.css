@@ -525,3 +525,17 @@ a:focus-visible, button:focus-visible{
 /* Option si Lighthouse pointe le bouton bleu (texte trop clair) :
    Dé-commente la ligne suivante pour un contraste AA strict sans changer ton bleu */
 /* .btn--primary{ color:#0b1220 !important; } */
+/* Contraste AA sans changer le bleu ni le blanc */
+.btn--primary{ background: var(--brand); color:#fff; }
+.btn--primary:hover{ background: var(--brand-2); color:#fff; }
+
+/* Petit fond sombre uniquement sous le TEXTE du bouton */
+.btn--primary .btn__label{
+  display: inline-block;
+  background: rgba(0,0,0,.32);   /* n'altère pas la couleur du bouton, juste sous le texte */
+  padding: .05rem .35rem;
+  border-radius: 6px;
+  line-height: 1.25;
+  box-decoration-break: clone;   /* si le texte va à la ligne */
+  -webkit-box-decoration-break: clone;
+}
