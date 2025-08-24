@@ -71,10 +71,11 @@
   <header class="header" id="top">
     <div class="container nav-inner">
       <a href="#top" class="logo-wrap" aria-label="ClimPro Accueil">
-        <!-- Logo laissé en webp -->
-        <img src="assets/img/logo.webp?v=2" alt="ClimPro" class="logo" />
+        <!-- Logo avec dimensions pour éviter le CLS -->
+        <img src="assets/img/logo.webp?v=3"
+             width="180" height="48"
+             alt="ClimPro" class="logo" decoding="async">
       </a>
-
       <nav class="quick-contacts" aria-label="Contacts rapides">
         <a class="chip chip--tel" href="tel:024284035" aria-label="Appeler Climpro">
           <span>02 428 40 35</span>
@@ -126,14 +127,15 @@
   <section class="hero" aria-label="ClimPro Hero">
     <div class="hero__bg">
       <picture>
-        <source srcset="assets/img/home.avif?v=2" type="image/avif">
-        <source srcset="assets/img/home.webp?v=2" type="image/webp">
+        <source srcset="assets/img/home.avif?v=3" type="image/avif">
+        <source srcset="assets/img/home.webp?v=3" type="image/webp">
         <img
-          src="assets/img/home.webp?v=2"
+          src="assets/img/home.webp?v=3"
           alt="Climatisation experte à Bruxelles"
           fetchpriority="high"
           decoding="async"
           sizes="100vw"
+          width="1600" height="900"
           style="aspect-ratio:16/9;width:100%;height:100%;object-fit:cover"
         />
       </picture>
@@ -164,27 +166,25 @@
   </section>
 
   <!-- Nos services -->
- <section id="services" class="section section--light">
-  <div class="container">
-    <h2 class="section__title a-reveal">Nos services</h2>
-    <div class="cards">
-      <a href="installation.html" class="card a-reveal" style="text-decoration:none;">
-        <h3>Installation</h3>
-        <p>Dimensionnement précis, pose soignée, marques premium. Confort immédiat et consommation optimisée.</p>
-      </a>
-      <a href="entretien.html" class="card a-reveal" style="text-decoration:none;">
-        <h3>Entretien</h3>
-        <p>Contrôle F-Gaz, nettoyage et maintenance préventive pour prolonger la durée de vie de vos équipements.</p>
-      </a>
-      <a href="depannage.html" class="card a-reveal" style="text-decoration:none;">
-        <h3>Dépannage</h3>
-        <p>Diagnostic rapide, pièces d’origine, intervention transparente avec devis clair avant travaux.</p>
-      </a>
+  <section id="services" class="section section--light">
+    <div class="container">
+      <h2 class="section__title a-reveal">Nos services</h2>
+      <div class="cards">
+        <a href="installation.html" class="card a-reveal" style="text-decoration:none;">
+          <h3>Installation</h3>
+          <p>Dimensionnement précis, pose soignée, marques premium. Confort immédiat et consommation optimisée.</p>
+        </a>
+        <a href="entretien.html" class="card a-reveal" style="text-decoration:none;">
+          <h3>Entretien</h3>
+          <p>Contrôle F-Gaz, nettoyage et maintenance préventive pour prolonger la durée de vie de vos équipements.</p>
+        </a>
+        <a href="depannage.html" class="card a-reveal" style="text-decoration:none;">
+          <h3>Dépannage</h3>
+          <p>Diagnostic rapide, pièces d’origine, intervention transparente avec devis clair avant travaux.</p>
+        </a>
+      </div>
     </div>
-  </div>
-</section>
-
-  <!-- Section Avis Google SUPPRIMÉE -->
+  </section>
 
   <section id="devis" class="section">
     <div class="container">
@@ -310,58 +310,57 @@
       </div>
     </div>
   </footer>
-<!-- Bouton “remonter en haut” (flèche noire) -->
-<button id="myBtn" aria-label="Revenir en haut" title="Haut">
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-    <path d="M12 4l-7 7h4v7h6v-7h4z"/>
-  </svg>
-</button>
 
-<style>
-  /* Style du bouton */
-  #myBtn{
-    display:none;                 /* caché par défaut */
-    position:fixed; bottom:20px; right:20px;
-    z-index:999;
-    width:48px; height:48px; border-radius:999px;
-    border:1px solid #0f172a; background:#fff; color:#0f172a;
-    cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.15);
-    /* PAS de display:grid ici */
-    place-items:center;           /* sera pris en compte quand on mettra display:grid via JS */
-  }
-  #myBtn:hover{ transform: translateY(-2px); }
+  <!-- Bouton “remonter en haut” (flèche noire) -->
+  <button id="myBtn" aria-label="Revenir en haut" title="Haut">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+      <path d="M12 4l-7 7h4v7h6v-7h4z"/>
+    </svg>
+  </button>
 
-  /* Si tu as le bouton d’appel .call-float en bas à droite,
-     on décale la flèche sur mobile pour éviter le chevauchement */
-  @media (max-width:720px){
-    #myBtn{ right:88px; }
-  }
-</style>
-
-<script>
-  (function(){
-    const btn = document.getElementById('myBtn');
-    if(!btn) return;
-
-    const showAt = 100; // px de scroll avant d’afficher
-    function onScroll(){
-      if(window.scrollY > showAt){ btn.style.display = 'grid'; }
-      else{ btn.style.display = 'none'; }
+  <style>
+    /* Style du bouton */
+    #myBtn{
+      display:none;
+      position:fixed; bottom:20px; right:20px;
+      z-index:999;
+      width:48px; height:48px; border-radius:999px;
+      border:1px solid #0f172a; background:#fff; color:#0f172a;
+      cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.15);
+      /* PAS de display:grid ici */
+      place-items:center;
     }
-    window.addEventListener('scroll', onScroll, { passive:true });
-    onScroll();
+    #myBtn:hover{ transform: translateY(-2px); }
 
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(reduce){
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-      }else{
-        window.scrollTo({ top:0, behavior:'smooth' });
+    @media (max-width:720px){
+      #myBtn{ right:88px; }
+    }
+  </style>
+
+  <script>
+    (function(){
+      const btn = document.getElementById('myBtn');
+      if(!btn) return;
+
+      const showAt = 100; // px de scroll avant d’afficher
+      function onScroll(){
+        if(window.scrollY > showAt){ btn.style.display = 'grid'; }
+        else{ btn.style.display = 'none'; }
       }
-    });
-  })();
-</script>
+      window.addEventListener('scroll', onScroll, { passive:true });
+      onScroll();
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if(reduce){
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }else{
+          window.scrollTo({ top:0, behavior:'smooth' });
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
