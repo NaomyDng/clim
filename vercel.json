@@ -26,3 +26,35 @@
     }
   ]
 }
+(function () {
+  const burger = document.getElementById('hamburger');
+  const menu   = document.getElementById('menu');
+  const close  = document.getElementById('menuClose');
+
+  if (!burger || !menu) return;
+
+  function openMenu() {
+    menu.classList.add('open','is-open');
+    burger.classList.add('active');
+    burger.setAttribute('aria-expanded','true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    menu.classList.remove('open','is-open');
+    burger.classList.remove('active');
+    burger.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+  }
+
+  burger.addEventListener('click', () => {
+    const isOpen = menu.classList.contains('open') || menu.classList.contains('is-open');
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  close && close.addEventListener('click', closeMenu);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  }, { passive: true });
+})();
