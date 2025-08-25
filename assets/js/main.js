@@ -1,254 +1,95 @@
-/* =========================
-   Utils (compat larges navigateurs)
-   ========================= */
-(function(){
-  window.__u = {
-    qs: function(sel, parent){ return (parent || document).querySelector(sel); },
-    qsa: function(sel, parent){ return Array.prototype.slice.call((parent || document).querySelectorAll(sel)); }
-  };
+/* ========= Utils ========= */
+const qs  = (s,p=document)=>p.querySelector(s);
+const qsa = (s,p=document)=>[...p.querySelectorAll(s)];
+
+/* ========= Header shadow ========= */
+(() => {
+  const header = qs('.header');
+  if(!header) return;
+  const onScroll=()=>{ (window.scrollY>6)?header.classList.add('scrolled'):header.classList.remove('scrolled'); };
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
 })();
 
-/* =========================
-   Header : ombre au scroll
-   ========================= */
-(function(){
-  var qs = __u.qs;
-  var header = qs('.header');
-  if (!header) return;
-
-  function onScroll(){
-    var y = window.scrollY || window.pageYOffset || 0;
-    if (y > 6) header.classList.add('scrolled');
-    else header.classList.remove('scrolled');
-  }
-  window.addEventListener('scroll', onScroll, { passive:true });
-  onScroll();
-})();
-
-/* =========================
-   Menu hamburger (toggle + a11y)
-   ========================= */
-(function(){
-  var qs = __u.qs, qsa = __u.qsa;
-  var ham = qs('#hamburger');
-  var menu = qs('#menu');
-  var closeBtn = qs('#menuClose');
-
-  function openMenu(){
-    if (!menu) return;
-    menu.classList.add('open');
-    if (ham){ ham.classList.add('active'); ham.setAttribute('aria-expanded','true'); }
-    document.body.style.overflow = 'hidden';
-    var firstLink = qs('.menu__links a', menu);
-    if (firstLink){ try{ firstLink.focus(); }catch(_){ } }
-  }
-  function closeMenu(){
-    if (!menu) return;
-    menu.classList.remove('open');
-    if (ham){ ham.classList.remove('active'); ham.setAttribute('aria-expanded','false'); try{ ham.focus(); }catch(_){ } }
-    document.body.style.overflow = '';
-  }
-
-  if (ham && menu){
-    ham.addEventListener('click', function(){
-      if (menu.classList.contains('open')) closeMenu(); else openMenu();
-    });
-    menu.addEventListener('click', function(e){
-      if (e.target === menu) closeMenu();
-    });
-    if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu();
-    });
-    qsa('.menu__links a', menu).forEach(function(a){ a.addEventListener('click', closeMenu); });
+/* ========= Menu hamburger ========= */
+(() => {
+  const ham=qs('#hamburger'), menu=qs('#menu'), closeBtn=qs('#menuClose');
+  const open=()=>{menu.classList.add('open');ham&&ham.classList.add('active');ham&&ham.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';};
+  const close=()=>{menu.classList.remove('open');ham&&ham.classList.remove('active');ham&&ham.setAttribute('aria-expanded','false');document.body.style.overflow='';};
+  if(ham&&menu){
+    ham.addEventListener('click',()=>menu.classList.contains('open')?close():open());
+    closeBtn&&closeBtn.addEventListener('click',close);
+    menu.addEventListener('click',e=>{if(e.target===menu)close();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open'))close();});
+    qsa('.menu__links a',menu).forEach(a=>a.addEventListener('click',close));
   }
 })();
 
-/* =========================
-   Routage vers #devis / #contact (fix sous-pages)
-   ========================= */
-(function(){
-  var qsa = __u.qsa;
-  var path = (location.pathname || '').replace(/\/+$/,'');
-  var onHome = path === '' || /(?:^|\/)index\.html$/i.test(path);
-
-  function wireToHomeAnchor(anchorId, legacyFile){
-    var links = qsa('a[href$="'+legacyFile+'"], a[href="#'+anchorId+'"]');
-    links.forEach(function(a){
-      a.setAttribute('href', onHome ? ('#'+anchorId) : ('index.html#'+anchorId));
-    });
-  }
-
-  wireToHomeAnchor('devis', 'devis.html');
-  wireToHomeAnchor('contact', 'contact.html');
+/* ========= Routage devis/contact ========= */
+(() => {
+  const path=(location.pathname||'').replace(/\/+$/,'');
+  const onHome=path===''||/(?:^|\/)index\.html$/i.test(path);
+  const wire=(id,file)=>qsa(`a[href$="${file}"],a[href="#${id}"]`).forEach(a=>a.setAttribute('href',onHome?`#${id}`:`index.html#${id}`));
+  wire('devis','devis.html'); wire('contact','contact.html');
 })();
 
-/* =========================
-   Année footer
-   ========================= */
-(function(){
-  var yearEl = __u.qs('#year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+/* ========= Année footer ========= */
+(() => { const y=qs('#year'); if(y) y.textContent=new Date().getFullYear(); })();
+
+/* ========= Reveal on scroll ========= */
+(() => {
+  const els=qsa('.a-reveal'); if(!els.length) return;
+  if(!('IntersectionObserver'in window)){els.forEach(el=>el.classList.add('is-visible'));return;}
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');io.unobserve(e.target);}}),{threshold:.12});
+  els.forEach(el=>io.observe(el));
 })();
 
-/* =========================
-   Reveal on scroll (avec fallback si IO absent)
-   ========================= */
-(function(){
-  var qsa = __u.qsa;
-  var targets = qsa('.a-reveal');
-  if (!targets.length) return;
-
-  if (!('IntersectionObserver' in window)){
-    targets.forEach(function(el){ el.classList.add('is-visible'); });
-    return;
+/* ========= Formulaires ========= */
+(() => {
+  const forms=qsa('#form-devis,#quoteForm'); if(!forms.length) return;
+  const setIfEmpty=(el,txt)=>{if(el&&!el.textContent.trim())el.textContent=txt;};
+  const legend=qs('#form-title'), path=location.pathname||'';
+  if(legend){
+    if(/entretien/i.test(path))setIfEmpty(legend,'Demande d’entretien');
+    else if(/depannage/i.test(path))setIfEmpty(legend,'Demande de dépannage');
+    else if(/installation/i.test(path))setIfEmpty(legend,'Demande d’info');
+    else setIfEmpty(legend,'Demande de devis gratuit');
   }
-
-  var io = new IntersectionObserver(function(entries, observer){
-    entries.forEach(function(e){
-      if (e.isIntersecting){
-        e.target.classList.add('is-visible');
-        observer.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.12 });
-
-  targets.forEach(function(el){ io.observe(el); });
-})();
-
-/* =========================
-   Formulaires — email OU téléphone requis
-   ========================= */
-(function(){
-  var qs = __u.qs, qsa = __u.qsa;
-  var forms = qsa('#form-devis, #quoteForm');
-  if (!forms.length) return;
-
-  function setIfEmpty(el, txt){ if (el && !el.textContent.trim()) el.textContent = txt; }
-
-  var legend = qs('#form-title');
-  var path = location.pathname || '';
-  if (legend){
-    if (/entretien/i.test(path)) setIfEmpty(legend, 'Demande d’entretien');
-    else if (/depannage/i.test(path)) setIfEmpty(legend, 'Demande de dépannage');
-    else if (/installation/i.test(path)) setIfEmpty(legend, 'Demande d’info');
-    else setIfEmpty(legend, 'Demande de devis gratuit');
-  }
-
-  forms.forEach(function(form){
-    var src = form.querySelector('#page_source');
-    if (src) src.value = document.title + ' — ' + location.href;
-
-    var success = form.querySelector('#formSuccess') || qs('#formSuccess');
-    var email   = form.querySelector('#email');
-    var phone   = form.querySelector('#phone');
-
-    function hasVal(el){ return !!(el && el.value && el.value.trim() !== ''); }
-    function validateContact(){
-      var ok = hasVal(email) || hasVal(phone);
-      if (!ok && email){
-        email.setCustomValidity('Indiquez au moins un email ou un téléphone.');
-        email.reportValidity();
-      } else if (email){
-        email.setCustomValidity('');
-      }
-      return ok;
-    }
-    if (email) email.addEventListener('input', function(){ email.setCustomValidity(''); });
-    if (phone) phone.addEventListener('input', function(){ if (email) email.setCustomValidity(''); });
-
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      if (!form.checkValidity()){ form.reportValidity(); return; }
-      if (!validateContact()) return;
-
-      var fd = new FormData(form);
-      var endpoint = form.getAttribute('action') || '';
-      var method   = (form.getAttribute('method') || 'POST').toUpperCase();
-
-      if (endpoint.indexOf('https://formspree.io') === 0 && method === 'POST' && 'fetch' in window){
-        fetch(endpoint, { method:'POST', body:fd, headers:{ 'Accept':'application/json' }})
-          .then(function(){ /* ok/nok: on affiche le succès pour UX */ })
-          .catch(function(){ /* silencieux */ })
-          .finally(function(){
-            form.reset();
-            if (success){
-              success.hidden = false;
-              try{ success.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(_){}
-            }
-          });
-      } else {
-        form.reset();
-        if (success){
-          success.hidden = false;
-          try{ success.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(_){}
-        }
-      }
+  forms.forEach(f=>{
+    const src=f.querySelector('#page_source'); if(src) src.value=document.title+' — '+location.href;
+    const success=f.querySelector('#formSuccess')||qs('#formSuccess');
+    const email=f.querySelector('#email'), phone=f.querySelector('#phone');
+    const hasVal=el=>el&&el.value.trim()!=='';
+    const validate=()=>{const ok=hasVal(email)||hasVal(phone);if(!ok&&email){email.setCustomValidity('Indiquez au moins un email ou un téléphone.');email.reportValidity();}else if(email){email.setCustomValidity('');}return ok;};
+    email&&email.addEventListener('input',()=>email.setCustomValidity(''));
+    phone&&phone.addEventListener('input',()=>email&&email.setCustomValidity(''));
+    f.addEventListener('submit',e=>{
+      e.preventDefault(); if(!f.checkValidity()){f.reportValidity();return;} if(!validate())return;
+      const fd=new FormData(f), endpoint=f.getAttribute('action')||'', method=(f.getAttribute('method')||'POST').toUpperCase();
+      if(endpoint.indexOf('https://formspree.io')===0&&method==='POST'&&'fetch'in window){
+        fetch(endpoint,{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(()=>{}).finally(()=>{
+          f.reset(); if(success){success.hidden=false;try{success.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}});
+      } else {f.reset(); if(success){success.hidden=false;}}
     });
   });
 })();
 
-/* =========================
-   Back to top (supporte #myBtn et #backToTop)
-   ========================= */
-(function(){
-  var btn = document.getElementById('myBtn') || document.getElementById('backToTop');
-  if (!btn) return;
-
-  // si le HTML a [hidden], on le retire pour laisser le JS gérer l’affichage
-  if (btn.hasAttribute('hidden')) btn.removeAttribute('hidden');
-  btn.style.display = 'none';
-
-  function toggle(){
-    var scrolled = window.scrollY || window.pageYOffset || 0;
-    btn.style.display = scrolled > 100 ? 'grid' : 'none';
-  }
-
-  window.addEventListener('scroll', toggle, { passive:true });
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', toggle);
-  } else {
-    toggle();
-  }
-
-  btn.addEventListener('click', function(e){
-    e.preventDefault();
-    var prefersReduced = false;
-    try{ prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(_){}
-    window.scrollTo({ top:0, left:0, behavior: prefersReduced ? 'auto' : 'smooth' });
-  });
+/* ========= Back to top (#myBtn ou #backToTop) ========= */
+(() => {
+  const btn=document.getElementById('myBtn')||document.getElementById('backToTop'); if(!btn)return;
+  if(btn.hasAttribute('hidden'))btn.removeAttribute('hidden'); btn.style.display='none';
+  const toggle=()=>{btn.style.display=(window.scrollY>100)?'grid':'none';};
+  window.addEventListener('scroll',toggle,{passive:true}); document.addEventListener('DOMContentLoaded',toggle);
+  btn.addEventListener('click',e=>{e.preventDefault();const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;window.scrollTo({top:0,left:0,behavior:reduce?'auto':'smooth'});});
 })();
 
-/* =========================
-   Devis modal — ouverture globale pour .open-devis
-   ========================= */
-(function(){
-  var modal = document.getElementById('devisModal');
-  if (!modal) return;
-
-  var closer = modal.querySelector('[data-close-modal]');
-
-  function openModal(){
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden','false');
-    document.documentElement.style.overflow = 'hidden';
-    var first = modal.querySelector('#fullname');
-    if (first){ setTimeout(function(){ try{ first.focus(); }catch(_){ } }, 50); }
-  }
-
-  function closeModal(){
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden','true');
-    document.documentElement.style.overflow = '';
-  }
-
-  document.addEventListener('click', function(e){
-    var t = e.target;
-    var btn = (t && t.closest) ? t.closest('.open-devis') : null;
-    if (btn){ e.preventDefault(); openModal(); }
-  });
-
-  if (closer) closer.addEventListener('click', closeModal);
-  modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+/* ========= Devis modal ========= */
+(() => {
+  const modal=document.getElementById('devisModal'); if(!modal)return;
+  const closer=modal.querySelector('[data-close-modal]');
+  const open=()=>{modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.documentElement.style.overflow='hidden';const first=modal.querySelector('#fullname');if(first)setTimeout(()=>{try{first.focus();}catch(_){}} ,50);};
+  const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.documentElement.style.overflow='';};
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.open-devis');if(b){e.preventDefault();open();}});
+  closer&&closer.addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close();});
 })();
