@@ -1,4 +1,23 @@
 /* =========================
+   PARE-BALLES API obsolète (TTS)
+   Désactive tout speechSynthesis.speak() déclenché sans geste utilisateur.
+   Si aucune synthèse vocale n'est voulue sur le site, c'est la solution 100% sûre.
+   ========================= */
+(function(){
+  try{
+    if (!('speechSynthesis' in window)) return;
+    const ss = window.speechSynthesis;
+    const noop = function(){};
+    // Neutralise speak() pour éviter l'avertissement Lighthouse "Uses deprecated APIs"
+    ss.speak  = noop;
+    // Assure des méthodes présentes (ne casse pas le code qui les appelle)
+    ss.cancel = ss.cancel || noop;
+    ss.pause  = ss.pause  || noop;
+    ss.resume = ss.resume || noop;
+  }catch(e){}
+})();
+
+/* =========================
    Utils
    ========================= */
 const qs  = (s, p=document) => p.querySelector(s);
@@ -70,7 +89,6 @@ if (ham && menu){
   wireToHomeAnchor('devis', 'devis.html');
   wireToHomeAnchor('contact', 'contact.html');
 })();
-
 
 /* =========================
    Année footer
@@ -190,6 +208,7 @@ qsa('.a-reveal').forEach(el=> io.observe(el));
     }
   });
 })();
+
 /* =========================
    Devis modal — ouverture globale pour .open-devis
    ========================= */
