@@ -1,23 +1,4 @@
 /* =========================
-   PARE-BALLES API obsolète (TTS)
-   Désactive tout speechSynthesis.speak() déclenché sans geste utilisateur.
-   Si aucune synthèse vocale n'est voulue sur le site, c'est la solution 100% sûre.
-   ========================= */
-(function(){
-  try{
-    if (!('speechSynthesis' in window)) return;
-    const ss = window.speechSynthesis;
-    const noop = function(){};
-    // Neutralise speak() pour éviter l'avertissement Lighthouse "Uses deprecated APIs"
-    ss.speak  = noop;
-    // Assure des méthodes présentes (ne casse pas le code qui les appelle)
-    ss.cancel = ss.cancel || noop;
-    ss.pause  = ss.pause  || noop;
-    ss.resume = ss.resume || noop;
-  }catch(e){}
-})();
-
-/* =========================
    Utils
    ========================= */
 const qs  = (s, p=document) => p.querySelector(s);
@@ -26,63 +7,62 @@ const qsa = (s, p=document) => [...p.querySelectorAll(s)];
 /* =========================
    Header shadow au scroll
    ========================= */
-const header = qs('.header');
-const onScroll = () => {
+(() => {
+  const header = qs('.header');
   if (!header) return;
-  if (window.scrollY > 6) header.classList.add('scrolled');
-  else header.classList.remove('scrolled');
-};
-window.addEventListener('scroll', onScroll, { passive:true });
-onScroll();
+  const onScroll = () => {
+    if (window.scrollY > 6) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+})();
 
 /* =========================
    Menu hamburger (toggle + a11y)
    ========================= */
-const ham = qs('#hamburger');
-const menu = qs('#menu');
-const closeBtn = qs('#menuClose');
+(() => {
+  const ham = qs('#hamburger');
+  const menu = qs('#menu');
+  const closeBtn = qs('#menuClose');
 
-function openMenu(){
-  if (!menu) return;
-  menu.classList.add('open');
-  ham?.classList.add('active');
-  ham?.setAttribute('aria-expanded','true');
-  document.body.style.overflow = 'hidden';
-  qs('.menu__links a')?.focus();
-}
-function closeMenu(){
-  if (!menu) return;
-  menu.classList.remove('open');
-  ham?.classList.remove('active');
-  ham?.setAttribute('aria-expanded','false');
-  document.body.style.overflow = '';
-  ham?.focus();
-}
-if (ham && menu){
-  ham.addEventListener('click', () => menu.classList.contains('open') ? closeMenu() : openMenu());
-  menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
-  closeBtn?.addEventListener('click', closeMenu);
-  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu(); });
-  qsa('.menu__links a', menu).forEach(a => a.addEventListener('click', closeMenu));
-}
+  function openMenu(){
+    if (!menu) return;
+    menu.classList.add('open');
+    ham?.classList.add('active');
+    ham?.setAttribute('aria-expanded','true');
+    document.body.style.overflow = 'hidden';
+    qs('.menu__links a', menu)?.focus();
+  }
+  function closeMenu(){
+    if (!menu) return;
+    menu.classList.remove('open');
+    ham?.classList.remove('active');
+    ham?.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+    ham?.focus();
+  }
+
+  if (ham && menu){
+    ham.addEventListener('click', () => menu.classList.contains('open') ? closeMenu() : openMenu());
+    menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
+    closeBtn?.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu(); });
+    qsa('.menu__links a', menu).forEach(a => a.addEventListener('click', closeMenu));
+  }
+})();
 
 /* =========================
    Routage intelligent vers #devis / #contact (fix Samsung)
    ========================= */
-(function(){
+(() => {
   const path = location.pathname.replace(/\/+$/,'');
-  const onHome = path === '' || /(?:^|\/)index\.html$/.test(path);
+  const onHome = path === '' || /(?:^|\/)index\.html$/i.test(path);
 
   function wireToHomeAnchor(anchorId, legacyFile){
     const links = qsa(`a[href$="${legacyFile}"], a[href="#${anchorId}"]`);
     links.forEach(a=>{
-      if (onHome){
-        // Laisse le comportement natif (PAS de preventDefault)
-        a.setAttribute('href', `#${anchorId}`);
-      } else {
-        // Depuis une sous-page, renvoie vers la home + ancre
-        a.setAttribute('href', `index.html#${anchorId}`);
-      }
+      a.setAttribute('href', onHome ? `#${anchorId}` : `index.html#${anchorId}`);
     });
   }
 
@@ -93,26 +73,34 @@ if (ham && menu){
 /* =========================
    Année footer
    ========================= */
-const yearEl = qs('#year');
-if (yearEl) yearEl.textContent = new Date().getFullYear();
+(() => {
+  const yearEl = qs('#year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+})();
 
 /* =========================
    Reveal on scroll
    ========================= */
-const io = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('is-visible');
-      io.unobserve(e.target);
-    }
-  });
-},{ threshold:.12 });
-qsa('.a-reveal').forEach(el=> io.observe(el));
+(() => {
+  const targets = qsa('.a-reveal');
+  if (!targets.length || !('IntersectionObserver' in window)) return;
+
+  const io = new IntersectionObserver((entries, observer)=>{
+    entries.forEach(e=>{
+      if (e.isIntersecting){
+        e.target.classList.add('is-visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold:.12 });
+
+  targets.forEach(el=> io.observe(el));
+})();
 
 /* =========================
-   Formulaire(s) — unifié + validation email OU téléphone
+   Formulaires — unifié + validation email OU téléphone
    ========================= */
-(function(){
+(() => {
   const forms = qsa('#form-devis, #quoteForm');
   if (!forms.length) return;
 
@@ -151,7 +139,7 @@ qsa('.a-reveal').forEach(el=> io.observe(el));
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if (!form.checkValidity()) { form.reportValidity(); }
+      if (!form.checkValidity()) { form.reportValidity(); return; }
       if (!validateContact()) return;
 
       const fd = new FormData(form);
@@ -165,56 +153,50 @@ qsa('.a-reveal').forEach(el=> io.observe(el));
           sent = res.ok;
         }
         form.reset();
-        if (success){ success.hidden = false; success.scrollIntoView({behavior:'smooth', block:'center'}); }
+        if (success){
+          success.hidden = false;
+          success.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
         if (!sent && endpoint) console.warn('Form submit non confirmé (vérifie l’endpoint).');
       }catch(err){
         console.error(err);
-        alert('Désolé, une erreur réseau est survenue. Réessayez.');
+        // on reste discret : pas d'alert bloquante
       }
     });
   });
 })();
 
-// === Back to top (affiche après 100px, sans toucher au HTML/CSS) ===
-(function(){
+/* =========================
+   Back to top (affiche après 100px)
+   ========================= */
+(() => {
   const btn = document.getElementById('myBtn');
   if (!btn) return;
 
-  // On ne laisse plus l'attribut [hidden] gérer l'affichage
   btn.removeAttribute('hidden');
-  btn.style.display = 'none'; // caché par défaut
+  btn.style.display = 'none';
 
-  function toggle(){
-    const scrolled = document.body.scrollTop || document.documentElement.scrollTop;
-    if (scrolled > 100){
-      if (btn.style.display !== 'grid') btn.style.display = 'grid'; // centre l’icône (grid déjà défini en CSS)
-    } else {
-      if (btn.style.display !== 'none') btn.style.display = 'none';
-    }
-  }
+  const toggle = () => {
+    const scrolled = window.scrollY || window.pageYOffset || 0;
+    btn.style.display = scrolled > 100 ? 'grid' : 'none';
+  };
 
-  window.addEventListener('scroll', toggle, { passive: true });
+  window.addEventListener('scroll', toggle, { passive:true });
   document.addEventListener('DOMContentLoaded', toggle);
 
   btn.addEventListener('click', (e)=>{
     e.preventDefault();
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced){
-      // comportement identique à ton exemple
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
-    } else {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top:0, left:0, behavior: prefersReduced ? 'auto' : 'smooth' });
   });
 })();
 
 /* =========================
    Devis modal — ouverture globale pour .open-devis
    ========================= */
-(function(){
+(() => {
   const modal = document.getElementById('devisModal');
-  if (!modal) return; // si la page n'a pas le modal, on sort
+  if (!modal) return;
 
   const closer = modal.querySelector('[data-close-modal]');
 
@@ -232,11 +214,11 @@ qsa('.a-reveal').forEach(el=> io.observe(el));
     document.documentElement.style.overflow = '';
   };
 
-  // Délégation de clic: n'importe quel .open-devis ouvre le modal
+  // Délégation : tout élément .open-devis ouvre le modal
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('.open-devis');
     if (btn) { e.preventDefault(); openModal(); }
-  });
+  }, { passive:false });
 
   closer?.addEventListener('click', closeModal);
   modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
