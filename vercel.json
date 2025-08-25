@@ -1,59 +1,30 @@
 {
-  "headers": [
+  "redirects": [
     {
-      "source": "/(.*).html",
-      "source": "/",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, must-revalidate" },
-        { "key": "CDN-Cache-Control", "value": "no-cache" }
-      ]
+      "source": "http://climpro.be/:path*",
+      "destination": "https://www.climpro.be/:path*",
+      "permanent": true
     },
     {
-      "source": "/(.*)\\.html",
+      "source": "http://www.climpro.be/:path*",
+      "destination": "https://www.climpro.be/:path*",
+      "permanent": true
+    },
+    {
+      "source": "https://climpro.be/:path*",
+      "destination": "https://www.climpro.be/:path*",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, must-revalidate" },
-        { "key": "CDN-Cache-Control", "value": "no-cache" }
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests; require-trusted-types-for 'script'" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
       ]
     }
   ]
 }
-(function () {
-  const burger = document.getElementById('hamburger');
-  const menu   = document.getElementById('menu');
-  const close  = document.getElementById('menuClose');
-
-  if (!burger || !menu) return;
-
-  function openMenu() {
-    menu.classList.add('open','is-open');
-    burger.classList.add('active');
-    burger.setAttribute('aria-expanded','true');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeMenu() {
-    menu.classList.remove('open','is-open');
-    burger.classList.remove('active');
-    burger.setAttribute('aria-expanded','false');
-    document.body.style.overflow = '';
-  }
-
-  burger.addEventListener('click', () => {
-    const isOpen = menu.classList.contains('open') || menu.classList.contains('is-open');
-    isOpen ? closeMenu() : openMenu();
-  });
-
-  close && close.addEventListener('click', closeMenu);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-  }, { passive: true });
-})();
